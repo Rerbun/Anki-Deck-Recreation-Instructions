@@ -16,4 +16,5 @@ Instructions on how to build Anki decks for Geoguessr, using Geohints as source
 // join string array with 'newline' character and use it for csv
 ```
 4. Now download the images from the webpage, there are browser extensions to do this
-5. Create a new deck in Anki, make sure the new deck is selected when importing the csv
+5. Move the images to the Anki media folder
+6. Create a new deck in Anki, make sure the new deck is selected when importing the csv
