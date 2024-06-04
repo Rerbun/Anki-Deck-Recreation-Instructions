@@ -1,8 +1,8 @@
 # anki-geoguessr-instructions
 Instructions on how to build Anki decks for Geoguessr, using Geohints as source
 
-## Poles
-1. Go to geohints.com and go to the poles page
+## Poles and Bollards
+1. Go to geohints.com and go to the poles or bollards page
 2. Open the dev tools with F12
 3. Copy the following and paste it in the dev tools console:
 ```js
@@ -15,7 +15,7 @@ window.countries = [];
 document.querySelectorAll('.country').forEach(element => window.countries.push(element.innerText));
 
 // Generate CSV string from both arrays
-window.csvString = `data:text/csv;charset=utf-8,${window.images.map((img, index) => `${window.countries[index]},<img src="${img}">`).join('\n')}`
+window.csvString = `data:text/csv;charset=utf-8,${window.images.map((img, index) => `${window.countries[index]},<img src="${img}">`).join('\n')}`;
 
 // Open string in browser to download input as CSV
 window.open(encodeURI(window.csvString));
