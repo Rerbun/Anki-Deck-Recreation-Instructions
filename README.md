@@ -15,7 +15,7 @@ window.countries = [];
 document.querySelectorAll('.country').forEach(element => window.countries.push(element.innerText));
 
 // Generate CSV string from both arrays
-window.csvString = `data:text/csv;charset=utf-8,${window.images.map((img, index) => `${window.countries[index]},<img src="${img}">`).join('\n')}`;
+window.csvString = `data:text/csv;charset=utf-8,${window.images.map((img, index) => `<img src="${img}">,${window.countries[index]}`).join('\n')}`;
 
 // Open string in browser to download input as CSV
 window.open(encodeURI(window.csvString));
