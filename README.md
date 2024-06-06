@@ -12,10 +12,15 @@ document.querySelectorAll('.bollard img').forEach(element => window.images.push(
 
 // Select all countries by selecting .country elements and saving the innerText to its own array
 window.countries = [];
-document.querySelectorAll('.country').forEach(element => window.countries.push(element.innerText));
+window.continents = [];
+document.querySelectorAll('.country').forEach(element => {
+  window.countries.push(element.innerText);
+  // Adds third field with continent
+  window.continents.push(element.closest('.section').querySelector('.headerText').innerText)
+});
 
 // Generate CSV string from both arrays
-window.csvString = `data:text/csv;charset=utf-8,${window.images.map((img, index) => `<img src="${img}">,${window.countries[index]}`).join('\n')}`;
+window.csvString = `data:text/csv;charset=utf-8,${window.images.map((img, index) => `<img src="${img}">,${window.countries[index]},${window.continents[index]}`).join('\n')}`;
 
 // Open string in browser to download input as CSV
 window.open(encodeURI(window.csvString));
