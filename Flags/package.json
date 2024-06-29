@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "start": "node main.js"
+  },
+  "dependencies": {
+    "download": "^8.0.0",
+    "wikipedia": "^2.1.2"
+  }
+}
