@@ -12,9 +12,11 @@ const fs = require("fs");
 
   await Promise.all(
     images.map(({ url }) => {
-      const filename = url.replace("Flag_of_", "").split("/").pop();
+      const encodedCountryName = url.replace("Flag_of_", "").split("/").pop();
+      const filename = decodeURIComponent(encodedCountryName).replace("'", "-");
       csvString += `<img src="${filename}">,${decodeURIComponent(
-        path.parse(filename).name.replace(/_/g, " ")
+        // Remove file extension and replace underscores with spaces
+        path.parse(encodedCountryName).name.replace(/_/g, " ")
       )}\n`;
       return download(url, "flags", {
         filename,
