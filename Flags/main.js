@@ -5,6 +5,7 @@ const fs = require("fs");
 
 // Fetch Wikimedia Commons page instead of regular Wikipedia page
 wiki.setLang("commons");
+const timestamp = Date.now();
 
 (async () => {
   console.log("Starting the script...");
@@ -28,16 +29,15 @@ wiki.setLang("commons");
       flagIamges.map(async ({ url }) => {
         console.log(`Processing image: ${url}`);
         const encodedCountryName = url.replace("Flag_of_", "").split("/").pop();
-        const filename = decodeURIComponent(encodedCountryName).replace(
-          "'",
-          "-"
-        );
+        const filename = decodeURIComponent(encodedCountryName)
+          .replace(/'/g, "-")
+          .replace(/[^\w\s.-]/g, ""); // Remove special characters
         console.log(`Decoded filename: ${filename}`);
 
-        csvString += `<img src="${filename}">,${decodeURIComponent(
+        csvString += `<img src="${filename}">,"${decodeURIComponent(
           // Remove file extension and replace underscores with spaces
           path.parse(encodedCountryName).name.replace(/_/g, " ")
-        )}\n`;
+        )}",${timestamp}\n`;
 
         console.log(`Downloading image: ${url}`);
         await download(url, "flags", {
