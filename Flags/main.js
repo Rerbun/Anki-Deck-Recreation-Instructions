@@ -28,10 +28,14 @@ const timestamp = Date.now();
     await Promise.all(
       flagIamges.map(async ({ url }) => {
         console.log(`Processing image: ${url}`);
-        const encodedCountryName = url.replace("Flag_of_", "").split("/").pop();
+        const encodedCountryName = url
+          .replace(/Flag_of_(the_)?/, "")
+          .split("/")
+          .pop();
         const filename = decodeURIComponent(encodedCountryName)
           .replace(/'/g, "-")
           .replace(/[^\w\s.-]/g, ""); // Remove special characters
+
         console.log(`Decoded filename: ${filename}`);
 
         csvString += `<img src="${filename}">,"${decodeURIComponent(
