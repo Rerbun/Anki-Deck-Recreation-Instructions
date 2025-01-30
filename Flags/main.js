@@ -8,6 +8,9 @@ const cheerio = require("cheerio");
 const path = require("path");
 const fs = require("fs");
 
+// Remove existing flags directory and its contents
+fs.rmSync("flags", { recursive: true, force: true });
+
 // Fetch Wikimedia Commons page instead of regular Wikipedia page
 wiki.setLang("commons");
 const timestamp = Date.now();
@@ -54,8 +57,6 @@ const timestamp = Date.now();
         // Rewrite URL to remove "/thumb/" and ".png" if present
         let fileUrl = url.replace(/\/thumb\//, "/").replace(/\/[^/]+$/, "");
 
-        console.log(`Downloading: ${fileUrl}`);
-
         csvString += `<img src="${safeFilename}.svg">,"${countryName}",${timestamp}\n`;
 
         await download(fileUrl, "flags", {
@@ -68,13 +69,7 @@ const timestamp = Date.now();
 
     progressBar.stop();
     console.log("Writing to flags.csv...");
-    fs.writeFile("flags.csv", csvString, (err) => {
-      if (err) {
-        console.error("Error writing to flags.csv:", err);
-      } else {
-        console.log("Successfully wrote to flags.csv.");
-      }
-    });
+    fs.writeFileSync("flags.csv", csvString);
   } catch (error) {
     console.error("An error occurred:", error);
   }

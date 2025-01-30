@@ -1,4 +1,2 @@
-flags.csv
-node_modules
-flags
+node_modules/
 package-lock.json
