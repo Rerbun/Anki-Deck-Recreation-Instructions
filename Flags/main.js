@@ -1,5 +1,10 @@
 const wiki = require("wikipedia");
 const download = require("download");
+const progressBar = new (require("cli-progress").SingleBar)({
+  format:
+    "Downloading images... | [{bar}] {percentage}% | ETA: {eta}s | {value}/{total}",
+});
+const cheerio = require("cheerio");
 const path = require("path");
 const fs = require("fs");
 
@@ -11,46 +16,57 @@ const timestamp = Date.now();
   console.log("Starting the script...");
 
   try {
-    console.log("Fetching the Wikipedia page...");
+    console.log("Fetching the Wikimedia page...");
 
     const page = await wiki.page("Sovereign-state_flags");
     console.log(
       `Page fetched successfully. page id: ${page.pageid}, title: ${page.title}, full url: ${page.fullurl}`
     );
 
-    console.log("Fetching images from the page...");
-    const images = await page.images({ limit: 500 });
-    const flagIamges = images.filter(({ url }) => url.includes("Flag_of_"));
-    console.log(`Found ${flagIamges.length} flag images.`);
+    const html = await page.html();
+    const $ = cheerio.load(html);
+
+    // Extract flag images with alt text
+    const flagImages = $("img")
+      .map((_, el) => ({
+        url: $(el).attr("src"),
+        alt: $(el).attr("alt"),
+      }))
+      .get()
+      .filter(({ url, alt }) => url.includes("Flag_of_") && alt);
+
+    console.log(`Found ${flagImages.length} flag images.`);
+    progressBar.start(flagImages.length, 0);
 
     let csvString = "";
 
     await Promise.all(
-      flagIamges.map(async ({ url }) => {
-        console.log(`Processing image: ${url}`);
-        const encodedCountryName = url
-          .replace(/Flag_of_(the_)?/, "")
-          .split("/")
-          .pop();
-        const filename = decodeURIComponent(encodedCountryName)
-          .replace(/'/g, "-")
-          .replace(/[^\w\s.-]/g, ""); // Remove special characters
+      flagImages.map(async ({ url, alt }) => {
+        // TODO: update Wikimedia Commons page to remove "Flag of" from some of the flag entries' image alt text
+        let countryName = alt.replace(/^(Flag of )?(the )?/, "").trim();
 
-        console.log(`Decoded filename: ${filename}`);
+        // Create a safe filename
+        let safeFilename = countryName
+          .replace(/'/g, "-") // Replace apostrophes
+          .replace(/[^\w\s.-]/g, "") // Remove special characters
+          .replace(/\s+/g, "_"); // Replace spaces with underscores
 
-        csvString += `<img src="${filename}">,"${decodeURIComponent(
-          // Remove file extension and replace underscores with spaces
-          path.parse(encodedCountryName).name.replace(/_/g, " ")
-        )}",${timestamp}\n`;
+        // Rewrite URL to remove "/thumb/" and ".png" if present
+        let fileUrl = url.replace(/\/thumb\//, "/").replace(/\/[^/]+$/, "");
 
-        console.log(`Downloading image: ${url}`);
-        await download(url, "flags", {
-          filename,
+        console.log(`Downloading: ${fileUrl}`);
+
+        csvString += `<img src="${safeFilename}.svg">,"${countryName}",${timestamp}\n`;
+
+        await download(fileUrl, "flags", {
+          filename: `${safeFilename}.svg`,
         });
-        console.log(`Downloaded image: ${filename}`);
+
+        progressBar.increment();
       })
     );
 
+    progressBar.stop();
     console.log("Writing to flags.csv...");
     fs.writeFile("flags.csv", csvString, (err) => {
       if (err) {
@@ -62,6 +78,4 @@ const timestamp = Date.now();
   } catch (error) {
     console.error("An error occurred:", error);
   }
-
-  console.log("Script finished.");
 })();
