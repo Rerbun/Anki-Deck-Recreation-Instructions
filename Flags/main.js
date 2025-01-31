@@ -36,7 +36,7 @@ const timestamp = Date.now();
         alt: $(el).attr("alt"),
       }))
       .get()
-      .filter(({ url, alt }) => url.includes("Flag_of_") && alt);
+      .filter(({ url }) => url.includes("Flag_of_"));
 
     console.log(`Found ${flagImages.length} flag images.`);
     progressBar.start(flagImages.length, 0);
@@ -45,7 +45,6 @@ const timestamp = Date.now();
 
     await Promise.all(
       flagImages.map(async ({ url, alt }) => {
-        // TODO: update Wikimedia Commons page to remove "Flag of" from some of the flag entries' image alt text
         let countryName = alt.replace(/^(Flag of )?(the )?/, "").trim();
 
         // Create a safe filename
@@ -70,6 +69,7 @@ const timestamp = Date.now();
     progressBar.stop();
     console.log("Writing to flags.csv...");
     fs.writeFileSync("flags.csv", csvString);
+    console.log("The deck has been successfully created.");
   } catch (error) {
     console.error("An error occurred:", error);
   }
